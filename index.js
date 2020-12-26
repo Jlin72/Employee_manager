@@ -255,6 +255,7 @@ const addRoles = () => {
     );
 };
 
+// The const addDepartment contains all the code required to add a department and connect it to the sql database.
 const addDepartment = () => {
     let question1 = {
         type: 'input',
@@ -281,6 +282,7 @@ const addDepartment = () => {
     });
 };
 
+// The const updateRole contains all the code to update an employee role.
 const updateRole = () => {
     connection.query (
         'SELECT * FROM employee;',
@@ -311,6 +313,8 @@ const updateRole = () => {
             });
         }
     );
+
+    //This next function is used to ask the user to confirm if the user selected the correct employee. This is in case there are multiple employees with the same last name.
     function nextChoices(employees) {
         let question1 = {
             type: 'list',
@@ -331,6 +335,7 @@ const updateRole = () => {
         });
     };
 
+    // This next function is used to prompt the user if they want to update the employee role based on an existing role or add a new one.
     function employeeUpdateChoices(employees) {
         let question1 = {
             type: 'list',
@@ -351,6 +356,7 @@ const updateRole = () => {
         });
     };
 
+    // This next function is used to update an employee role based on existing roles.
     function employeeRoleUpdate(employees) {
         connection.query(
             `SELECT * FROM role;`,
@@ -375,8 +381,6 @@ const updateRole = () => {
                             roleId = res[i].id;
                         }
                     };
-                    // console.log(roleId);
-                    // console.log(employeeName);
                     connection.query(
                         'UPDATE employee SET ? WHERE ?',
                         [
@@ -398,6 +402,7 @@ const updateRole = () => {
         );
     };
 
+    // This following functions are used to update an employee role by adding a new role instead.
     function addAndUpdate(employees) {
         connection.query (
             `SELECT * FROM department`,
