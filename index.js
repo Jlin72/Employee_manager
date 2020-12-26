@@ -504,24 +504,45 @@ const updateRole = () => {
     };
 };
 
-// const updateManager = () => {
-//     connection.query(
-//         'SELECT * FROM employee;',
-//         (err,res) => {
-//             if(err) throw err;
-//             let employeeArr = [];
-//             for(i=0;i<res.length;i++) {
-//                 employeeArr.push(res[i].last_name);
-//             };
+const updateManager = () => {
+    connection.query(
+        'SELECT * FROM employee;',
+        (err,res) => {
+            if(err) throw err;
+            let employeeArr = [];
+            for(i=0;i<res.length;i++) {
+                employeeArr.push(res[i].last_name);
+            };
             
-//             let question1 = {
-//                 type: 'rawlist',
-//                 name: 'employee_choice',
-//                 message: 'Choose for which employee you want to update their manager',
-//                 choices: employeeArr
-//             };
+            let question1 = {
+                type: 'rawlist',
+                name: 'employee_choice',
+                message: 'Choose for which employee you want to update their manager',
+                choices: employeeArr
+            };
 
+            inquirer.prompt(question1).then(answer => {
+                selectManager(answer.employee_choice);
+            });
+        }
+    );
 
-//         }
-//     );
-// };
+    function selectManager (employee) {
+        connection.query(
+            `SELECT employee.id, employee.first_name, employee.last_name, role.id, role.title
+            FROM employee
+            INNER JOIN role ON employee.role_id = role.id;`,
+            (err, res) => {
+                if (err) throw err;
+                let managerArr = [];
+                let managerid;
+                for(i=0;i<res.length;i++) {
+                    if(res[i].title.toLowerCase().includes('manager')) {
+                        managerArr.push(res[i].last_name);
+                    }
+                };
+                console.log(managerArr);
+            }
+        );
+    };
+};
