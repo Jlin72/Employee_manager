@@ -523,7 +523,6 @@ const updateManager = () => {
                 choices: employeeArr
             };
             inquirer.prompt(question1).then(answer => {
-                console.log(answer.employee_choice);
                 selectFirstName(answer.employee_choice);
             });
         }
@@ -568,7 +567,6 @@ const updateManager = () => {
             (err, res) => {
                 if (err) throw err;
                 let managerArr = [];
-                console.log(res);
                 for(i=0;i<res.length;i++) {
                     if(res[i].title.toLowerCase().includes('manager')) {
                         managerArr.push(res[i].last_name)
@@ -588,8 +586,27 @@ const updateManager = () => {
                             selectedManagerId = res[i].id
                         }
                     };
-                    console.log(selectedManagerId);
-                })
+                    managerUpdate();
+                });
+            }
+        );
+    };
+
+    function managerUpdate() {
+        connection.query(
+            'UPDATE employee SET ? WHERE ?',
+            [
+                {
+                    manager_id: selectedManagerId,
+                },
+                {
+                    id: selectedEmployeeId,
+                },
+            ],
+            (err) => {
+                if(err) throw err;
+                console.log('Employee manager updated successfully!');
+                init();
             }
         );
     };
