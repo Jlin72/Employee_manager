@@ -505,43 +505,91 @@ const updateRole = () => {
 };
 
 const updateManager = () => {
+    let selectedEmployeeId;
+    let selectedManagerId;
     connection.query(
         'SELECT * FROM employee;',
         (err,res) => {
             if(err) throw err;
             let employeeArr = [];
+            let allEmployee = [];
             for(i=0;i<res.length;i++) {
                 employeeArr.push(res[i].last_name);
-            };
-            
+            }
             let question1 = {
                 type: 'rawlist',
                 name: 'employee_choice',
                 message: 'Choose for which employee you want to update their manager',
                 choices: employeeArr
             };
-
             inquirer.prompt(question1).then(answer => {
-                selectManager(answer.employee_choice);
+                console.log(answer.employee_choice);
+                selectFirstName(answer.employee_choice);
             });
         }
     );
 
-    function selectManager (employee) {
+    //This next function is added in case there is a person with a similar last name
+    function selectFirstName(employee) {
+        let firstNameArr = [];
         connection.query(
-            `SELECT employee.id, employee.first_name, employee.last_name, role.id, role.title
+            'SELECT * FROM employee WHERE last_name=?',
+            [employee],
+            (err, res) => {
+                if (err) throw err;
+                res.forEach(({first_name}) => {
+                    firstNameArr.push(first_name);
+                });
+                
+                let question1 = {
+                    type: 'rawlist',
+                    message: 'This is done in case there are several employees with the same last name. Please choose the correct employee based on their first name. If there is only one choice just press enter to continue.',
+                    choices: firstNameArr,
+                    name:'first_name'
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    for (i=0; i<res.length; i++) {
+                        if(answer.first_name === res[i].first_name) {
+                            selectedEmployeeId = res[i].id;
+                        }
+                    };
+                    selectManager();
+                });
+            }
+        )
+    }
+
+    function selectManager () {
+        connection.query(
+            `SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title
             FROM employee
             INNER JOIN role ON employee.role_id = role.id;`,
             (err, res) => {
                 if (err) throw err;
                 let managerArr = [];
-                let managerid;
+                console.log(res);
                 for(i=0;i<res.length;i++) {
                     if(res[i].title.toLowerCase().includes('manager')) {
-                        managerArr.push(res[i].last_name);
+                        managerArr.push(res[i].last_name)
                     }
                 };
-                console.log(managerArr);
+
+                let question1 = {
+                     type: 'list',
+                     name: 'manager_list',
+                     message: 'Please choose the manager you want to update this employee manager with',
+                     choices: managerArr,
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    for (i=0; i<res.length; i++) {
+                        if(answer.manager_list === res[i].last_name) {
+                            selectedManagerId = res[i].id
+                        }
+                    };
+                    console.log(selectedManagerId);
+                })
             }
         );
     };
