@@ -42,7 +42,7 @@ const init = () => {
         type: 'rawlist',
         name: 'init_choice',
         message: 'Please select what you would like to do today',
-        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'Add department', 'Add employee', 'Add roles', 'Update employee role', 'Upadate an employee manager', 'EXIT']
+        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add department', 'Add employee', 'Add roles', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'EXIT']
     };
     inquirer.prompt(question1).then((answer) => {
         console.log('You have selected: ' + answer.init_choice);
@@ -55,6 +55,9 @@ const init = () => {
                 break;
             case 'View all employees by role':
                 viewEmployeeRole();
+                break;
+            case 'View all employees by manager':
+                viewEmployeebyManager();
                 break;
             case 'Add department':
                 addDepartment();
@@ -70,6 +73,9 @@ const init = () => {
                 break;
             case 'Upadate an employee manager':
                 updateManager();
+                break;
+            case 'Delete employee, role or department':
+                deleteinfo();
                 break;
             case 'EXIT':
                 console.log(`BYE, thank you for using the app`);
@@ -611,3 +617,81 @@ const updateManager = () => {
         );
     };
 };
+
+const viewEmployeebyManager = () => {
+    let managerArr= [];
+    let managerId;
+    connection.query(
+        `SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title
+        FROM employee
+        INNER JOIN role ON employee.role_id = role.id;`,
+        (err, res) => {
+            if(err) throw err;
+            for (i=0;i<res.length;i++) {
+                if(res[i].title.toLowerCase().includes('manager')) {
+                    managerArr.push(res[i].last_name);
+                }
+            };
+
+            let question1 = {
+                type: 'rawlist',
+                message: 'Please choose which manager you want to check the employees under',
+                name: 'manager_choice',
+                choices: managerArr
+            };
+
+            inquirer.prompt(question1).then(answer => {
+                console.log('You have selected a manager with the following last name: '+ answer.manager_choice);
+                managerFirstName(answer.manager_choice);
+            })
+        }
+    );
+
+    function managerFirstName (manager) {
+        connection.query(
+            'SELECT * FROM employee where last_name=?',
+            [manager],
+            (err, res) => {
+                if(err) throw err;
+                
+                let question1 = {
+                    type: 'rawlist',
+                    name: 'manager_first_name_choice',
+                    message: 'This next choice is done in case there are managers with similar last names. If there are, please select the correct manager you would like to check based on their first name. If there is only one just press enter to continue',
+                    choices () {
+                        let managerFirstArr = [];
+                        for(i=0;i<res.length;i++) {
+                            managerFirstArr.push(res[i].first_name);
+                        } return managerFirstArr;
+                    },
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    console.log(`Here are the employees who are under the supervision of ${answer.manager_first_name_choice} ${manager}.`)
+                    for(i=0;i<res.length;i++) {
+                        if (answer.manager_first_name_choice === res[i].first_name) {
+                            managerId = res[i].id;
+                        };
+                    };
+                    employeeTableCreator();
+                });
+            }
+        );
+    };
+
+    const employeeTableCreator = () => {
+        connection.query(
+            `SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee
+            INNER JOIN role ON employee.role_id = role.id
+            WHERE employee.manager_id=?;`,
+            [managerId],
+            (err, res) => {
+                if(err) throw err;
+                console.table(res);
+                init();
+            }
+        );
+    };
+};
+
+const deleteinfo = () => {};
