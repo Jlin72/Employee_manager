@@ -694,4 +694,40 @@ const viewEmployeebyManager = () => {
     };
 };
 
-const deleteinfo = () => {};
+const deleteinfo = () => {
+    let question1 = {
+        type: 'rawlist',
+        name: 'delete_choice',
+        message: 'Please select what you would like to delete',
+        choices: ['Delete an employee', 'Delete a role', 'Delete a department', 'Return to previous menu']
+    };
+
+    inquirer.prompt(question1).then(answer => {
+        switch(answer.delete_choice) {
+            case 'Delete an employee':
+                deleteEmployee();
+                break;
+            case 'Delete a role':
+                deleteRole();
+                break;
+            case 'Delete a department':
+                deleteDepartment();
+                break;
+            case 'Return to previous menu':
+                init();
+                break;
+        };
+    });
+
+    const deleteEmployee = () => {
+        console.log(`Hello`);
+    };
+
+    const deleteRole = () => {
+        console.log('Hello');
+    };
+
+    const deleteDepartment = () => {
+        console.log('Hello');
+    };
+};
