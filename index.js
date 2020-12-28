@@ -42,7 +42,7 @@ const init = () => {
         type: 'rawlist',
         name: 'init_choice',
         message: 'Please select what you would like to do today',
-        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add department', 'Add employee', 'Add roles', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'EXIT']
+        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add department', 'Add employee', 'Add roles', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'View the total utilized budget of a department', 'EXIT']
     };
     inquirer.prompt(question1).then((answer) => {
         console.log('You have selected: ' + answer.init_choice);
@@ -75,7 +75,10 @@ const init = () => {
                 updateManager();
                 break;
             case 'Delete employee, role or department':
-                deleteinfo();
+                deletefunction();
+                break;
+            case 'View the total utilized budget of a department':
+                viewBudget();
                 break;
             case 'EXIT':
                 console.log(`BYE, thank you for using the app`);
@@ -694,7 +697,7 @@ const viewEmployeebyManager = () => {
     };
 };
 
-const deleteinfo = () => {
+const deletefunction = () => {
     let question1 = {
         type: 'rawlist',
         name: 'delete_choice',
@@ -925,4 +928,54 @@ const deleteinfo = () => {
             });
         };
     };
+};
+
+const viewBudget = () => {
+    let totalBudget = 0;
+    let departmentId;
+    connection.query(
+        'SELECT * FROM department;',
+        (err,res) => {
+            if(err) throw err;
+
+            let question1 = {
+                type: 'rawlist',
+                name: 'departments',
+                message: 'Please select which department you want to check the budget for',
+                choices() {
+                    let departmentArr = [];
+                    for(i=0;i<res.length;i++) {
+                        departmentArr.push(res[i].department)
+                    } return departmentArr;
+                }
+            };
+
+            inquirer.prompt(question1).then(answer => {
+                for(i=0;i<res.length;i++) {
+                    if(answer.departments === res[i].department) {
+                        departmentId = res[i].id;
+                    }
+                };
+                console.log(`You have seleced the following department: ${answer.departments}`);
+                budgetQuery(answer.departments);
+            });
+        }
+    );
+
+    const budgetQuery = (department) => {
+        connection.query(
+            `SELECT * FROM role where department_id=?`,
+            [departmentId],
+            (err, res) => {
+                if(err) throw err;
+                for(i=0; i<res.length; i++) {
+                    totalBudget += res[i].salary;
+                };
+                console.log(`----------------`);
+                console.log(`The total budget for the following department: ${department} is ${totalBudget}`);
+                console.log(`----------------`);
+                init();
+            }
+        );
+    }
 };
