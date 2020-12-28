@@ -720,11 +720,149 @@ const deleteinfo = () => {
     });
 
     const deleteEmployee = () => {
-        console.log(`Hello`);
+        let employeeId;
+        connection.query(
+            'SELECT * FROM employee;',
+            (err, res) => {
+                if (err) throw err;
+
+                let question1 = {
+                    type: 'rawlist',
+                    name: 'employee_choice',
+                    message: 'Select the which employee you want to delete, these are all the last names of the current employees',
+                    choices () {
+                        const employeeArr = [];
+                        for(i=0;i<res.length;i++) {
+                            employeeArr.push(res[i].last_name);
+                        } return employeeArr;
+                    }
+                };
+                
+                inquirer.prompt(question1).then(answer => {
+                    employeeFirstName(answer.employee_choice);
+                });
+            }
+        );
+
+        const employeeFirstName = (employee) => {
+            connection.query(
+                'SELECT * FROM employee WHERE last_name=?',
+                [employee],
+                (err, res) => {
+                    if(err) throw err;
+
+                    let question1 = {
+                        type: 'rawlist',
+                        name: 'first_name',
+                        message: 'This is in case there are employees with similar last name, please choose the employee you wish to delete based on their first name. If there is only one name press enter to continue',
+                        choices() {
+                            let employeeArr = [];
+                            for(i=0;i<res.length;i++) {
+                                employeeArr.push(res[i].first_name);
+                            } return employeeArr;
+                        }
+                    };
+
+                    inquirer.prompt(question1).then(answer => {
+                        console.log(`You have selected to delete the following employee: first name: ${answer.first_name} | last name: ${employee}`);
+                        for(i=0;i<res.length;i++) {
+                            if(res[i].first_name === answer.first_name) {
+                                employeeId = res[i].id;
+                            };
+                        };
+                        deleteConfirmation(answer.first_name, employee);
+                    });
+                }
+            );
+        };
+
+        const deleteConfirmation = (first_name, last_name) => {
+            let question1 = {
+                type: 'list',
+                name: 'delete_confirmation',
+                message: 'Are you sure you want to delete this employee? Once done, the selected employee will be deleted for ever.',
+                choices: ['YES', 'NO']
+            };
+
+            inquirer.prompt(question1).then(answer => {
+                switch (answer.delete_confirmation) {
+                    case 'YES':
+                        connection.query(
+                            'DELETE FROM employee WHERE id=?',
+                            [employeeId],
+                            (err) => {
+                                if(err) throw err;
+                                console.log(`Employee ${first_name} ${last_name} has been successfully deleted!`);
+                                init();
+                            }
+                        );
+                        break;
+                    case 'NO':
+                        init();
+                        break;
+                }
+            });
+        };
     };
 
     const deleteRole = () => {
-        console.log('Hello');
+        let roleId;
+        connection.query(
+            'SELECT * FROM role;',
+            (err, res) => {
+                if(err) throw err;
+
+                let question1 = {
+                    type: 'rawlist',
+                    name: 'role_list',
+                    message: 'Please select which role you would like to delete',
+                    choices() {
+                        let roleArr = [];
+                        for(i=0;i<res.length;i++) {
+                            roleArr.push(res[i].title);
+                        } return roleArr;
+                    }
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    for (i=0;i<res.length;i++) {
+                        if(res[i].title === answer.role_list) {
+                            roleId = res[i].id;
+                        };
+                    };
+                    console.log(`You have selected: ${answer.role_list}`);
+                    confirmRoleDelete(answer.role_list);
+                });
+            }
+        );
+
+        const confirmRoleDelete = (role) => {
+            let question1 = {
+                type: 'list',
+                name: 'confirm',
+                message: 'Are you sure you want to delete the selected role? Once deleted there is no way to undo the deletion',
+                choices: ['YES', 'NO']
+            };
+
+            inquirer.prompt(question1).then(answer => {
+                switch(answer.confirm) {
+                    case 'YES':
+                        connection.query(
+                            `DELETE FROM role WHERE id=?`,
+                            [roleId],
+                            (err) => {
+                                if (err) throw err;
+                                console.log(`The following role: ${role} has been successfully deleted!`);
+                                init();
+                            }
+                        );
+                        break;
+                    case 'NO':
+                        init();
+                        break;
+                }
+            });
+        };
     };
 
     const deleteDepartment = () => {
