@@ -277,7 +277,7 @@ const addDepartment = () => {
         connection.query(
             `INSERT INTO department SET ?`,
             {
-                name: answer.department,
+                department: answer.department,
             },
             (err, res) => {
                 if(err) throw err;
@@ -866,6 +866,63 @@ const deleteinfo = () => {
     };
 
     const deleteDepartment = () => {
-        console.log('Hello');
+        let departmentId;
+        connection.query(
+            'SELECT * FROM department;',
+            (err, res) => {
+                if(err) throw err;
+                
+                let question1= {
+                    type: 'rawlist',
+                    message: 'Please select which department you want to delete',
+                    name: 'department_list',
+                    choices() {
+                        const departmentArr = [];
+                        for(i=0; i<res.length; i++) {
+                            departmentArr.push(res[i].department);
+                        } return departmentArr;
+                    }
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    for(i=0; i<res.length ;i++) {
+                        if (answer.department_list === res[i].department) {
+                            departmentId = res[i].id;
+                        }
+                    };
+                    console.log(`You have selected to delete the following role: ${answer.department_list}`);
+                    confirmDepartmentDelete(answer.department_list);
+                });
+            }
+        );
+
+        const confirmDepartmentDelete = (department) => {
+            let question1 = {
+                type: 'list',
+                message: 'Are you sure you want to delete the selected department? Once deleted there is no way to undo the deletion',
+                name: 'confirm',
+                choices: ['YES', 'NO']
+            };
+            
+    
+            inquirer.prompt(question1).then(answer => {
+                switch(answer.confirm) {
+                    case 'YES':
+                        connection.query(
+                            `DELETE FROM department WHERE id=?;`,
+                            [departmentId],
+                            (err) => {
+                                if(err) throw err;
+                                console.log(`The following department: ${department} has been successfully deleted!`);
+                            }
+                        );
+                        init();
+                        break;
+                    case 'NO':
+                        init();
+                        break;
+                };
+            });
+        };
     };
 };
