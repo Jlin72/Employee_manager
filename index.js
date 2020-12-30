@@ -42,7 +42,7 @@ const init = () => {
         type: 'rawlist',
         name: 'init_choice',
         message: 'Please select what you would like to do today',
-        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add department', 'Add employee', 'Add roles', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'View the total utilized budget of a department', 'EXIT']
+        choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add employee, role or department', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'View the total utilized budget of a department', 'EXIT']
     };
     inquirer.prompt(question1).then((answer) => {
         console.log('You have selected: ' + answer.init_choice);
@@ -59,14 +59,8 @@ const init = () => {
             case 'View all employees by manager':
                 viewEmployeebyManager();
                 break;
-            case 'Add department':
-                addDepartment();
-                break;
-            case 'Add employee':
-                addEmployee();
-                break;
-            case 'Add roles':
-                addRoles();
+            case 'Add employee, role or department':
+                addEmployeeRoleDepartment();
                 break;
             case 'Update employee role':
                 updateRole();
@@ -86,6 +80,29 @@ const init = () => {
                 process.exit(0);
         }
     })
+};
+
+const addEmployeeRoleDepartment = () => {
+    let question1 = {
+        type: 'rawlist',
+        name: 'addEmployeeRoleDepartment',
+        message: 'What would you like to add',
+        choices: ['Add new employee', 'Add new role', 'Add new department']
+    };
+
+    inquirer.prompt(question1).then(answer => {
+        switch(answer.addEmployeeRoleDepartment) {
+            case 'Add new employee':
+                addEmployee();
+                break;
+            case 'Add new role':
+                addRole();
+                break;
+            case 'Add new department':
+                addDepartment();
+                break;
+        };
+    });
 };
 
 const viewEmployees = () => {
@@ -201,7 +218,7 @@ const addEmployee = () => {
     );
 };
 
-const addRoles = () => {
+const addRole = () => {
     connection.query (
         `SELECT * FROM department`,
         (err, res) => {
@@ -301,27 +318,47 @@ const updateRole = () => {
             for(i=0; i<res.length; i++) {
                 employeeArr.push(res[i].last_name);
             };
-            console.log(employeeArr);
 
             let question1 = {
                 type: 'rawlist',
                 name: 'employees',
-                message: 'Please select which employee you want ther roles updated',
+                message: 'Please select which employee you want their roles updated',
                 choices: employeeArr
             };
 
             inquirer.prompt(question1).then(answer => {
-                let first_name;
-                for(i=0;i<res.length; i++) {
-                    if(answer.employees === res[i].last_name) {
-                        first_name = res[i].first_name;
-                    };
-                };
-                console.log(`You have selected the following employee: first name: ${first_name}, last name: ${answer.employees}.`);
-                nextChoices(answer.employees);
+                employeeFirst(answer.employees);
+                // nextChoices(answer.employees);
             });
         }
     );
+
+    const employeeFirst = (employee) => {
+        connection.query(
+            'SELECT * FROM employee WHERE last_name=?;',
+            [employee],
+            (err, res) => {
+                if(err) throw err;
+
+                const employeeLast = [];
+                for(i=0;i<res.length;i++) {
+                    employeeLast.push(res[i].first_name);
+                };
+
+                let question1 = {
+                    type: 'rawlist',
+                    name: 'employeeFirst',
+                    message: 'This is done in case there are multiple employees with the same last name. if there are, please select the employee you want to update their role based on their first name. If there is only one choice just press enter.',
+                    choices: employeeLast
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    console.log(`You have selected the following employee: First name: ${answer.employeeFirst} | Last name: ${employee}`);
+                    nextChoices(employee);
+                });
+            }
+        );
+    };
 
     //This next function is used to ask the user to confirm if the user selected the correct employee. This is in case there are multiple employees with the same last name.
     function nextChoices(employees) {
@@ -508,7 +545,7 @@ const updateRole = () => {
                         init();
                 }
                 );
-            }
+            };
         };
     };
 };
