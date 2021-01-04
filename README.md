@@ -18,26 +18,22 @@
 ## Description 
   This repository contains all the required code for the node application employee manager to work.
 ## Installation
- No installation required, just click on the deployed application link to launch the application.
- 
- However, if the user wants to have the application available on their local pc and use local host instead, then follow these steps:
-  In order to run this application, first, the user has to download the files from the repository. Second, once the user has downloaded the files, the user must locate where the files have been downloaded on their console. Third, once the user have located the files on their console, the user must type npm install, to install all the required files that will be needed to run the application.
+  To run this application the user must first start download the entire repository either as a zip file or as a clone. Once that is done, then the user on their console must locate their files on their console. Next, on the console the user must type 'npm install' to download all the dependencies.
+
+  Next, the user must start the database. To start the database, the user can use the provided sql file located within the repository. NOTE: FOR THE NEXT STEPS THE MYSQL IS REQUIERED. On mySql or on the console, the user should just copy and paste the code of the sql file into the console or mysql and run it. Check the videos for a visual tutorial on how to start the database.
 ## Usage
-  -If running form localhosts:
-  
- First, to run the application the user must locate the files location on their console. Second, the user must type on their console node server. This is required as this will start running the application on localhost:8080. Next, the user must open their browser and on their browser type http://localhost:8080, this will take the user to the website. Then, follow the next steps.
-  
-  -Otherwise:
-  
-  Once on the website to start the application the user must press on get started. Next, to enter a note the user must click on note title or note text, once clicked enter the user can enter whatever information they want. Next, once that is done, the user must click on the save icon on top, this will save the note to the database. In addition, if the user wants to check their added notes, the user must click right on the note title. Also, in order to delete that note, the user must click on the delete button. Lastly, if the user wants to enter a new note, just click on the pencil icon on top.
+  Follow the next steps to run the app:
+    1. Type npm start on the console.
+    2. Select what you would like to do with the app.
+    3. If done using the app, select EXIT to close the app.
+    NOTE: if at any moment you need to restart the app press control C to stop the app, then type npm start to start again.
+## Weaknesses
+  One of the weaknesses for this app arises when adding and updating managers, because it forces the user to type the word manager on the role title. More work is required to overcome this problem, maybe like creating a table on the database only for managers.
 ## Screenshots or video
-    Screenshot of the homepage:
-  ![Homepage](https://i.imgur.com/atjpcMI.png)
-    Screenshot of the note taker app:
-  ![Note Taker App](https://i.imgur.com/irPKmtQ.png)
-    Screenshot of note:
-  ![Note entered](https://i.imgur.com/97SsIh6.png)
-  Video of the application in use: https://youtu.be/lRmym-NH34w
+    Screenshot of the App on the console:
+  ![App](https://i.imgur.com/E0BpFIF.png)
+  Video of the application in use: 
+  Video of how to install the app: https://www.youtube.com/watch?v=BC9X-3hdqU0&feature=youtu.be
 ## Credits
   Made by: Jhonny Lin (Github: Jlin72 https://github.com/Jlin72)
 ## License

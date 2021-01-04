@@ -6,7 +6,7 @@ const mysql = require('mysql');
 const connectionParam = {
     database: 'workDB',
     host: 'localhost',
-    password: '',
+    password: 'RinaPoyo349!',
     PORT: 3306,
     user: 'root'
 };
@@ -168,7 +168,8 @@ const viewEmployeeRole = () => {
 
 //The next function, addEmployee, is used to add a new employee to the database.
 const addEmployee = () => {
-    connection.query( //The following query is done to access to the dabase and obtain information from the role table, this is done to create a list of the roles available. This list is then used to ask the user to select one of the roles for the employee. Also, the id from that role will be used later to update the information within the database.
+    //The following query is done to access to the dabase and obtain information from the role table, this is done to create a list of the roles available. This list is then used to ask the user to select one of the roles for the employee. Also, the id from that role will be used later to update the information within the database.
+    connection.query( 
         `SELECT * FROM role;`,
         (err, res) => {
             if(err) throw err;
@@ -218,7 +219,7 @@ const addEmployee = () => {
                     }, 
                     (err, res) => {
                         if (err) throw err;
-                        console.log('\x1b[46m',`Added employee ${answer.last_name} successfully!`,'\x1b[0m');
+                        console.log('\x1b[36m',`Added employee ${answer.last_name} successfully!`,'\x1b[0m');
                         init();
                     }
                 );
@@ -282,7 +283,7 @@ const addRole = () => {
                     },
                     (err, res) => {
                         if (err) throw err;
-                        console.log('\x1b[46m',`Role ${answers.role} added successfully!`,'\x1b[0m');
+                        console.log('\x1b[36m',`Role ${answers.role} added successfully!`,'\x1b[0m');
                         init();
                     }
                 );
@@ -311,7 +312,7 @@ const addDepartment = () => {
             },
             (err, res) => {
                 if(err) throw err;
-                console.log('\x1b[46m',`Created ${answer.department} department successfully`,'\x1b[0m');
+                console.log('\x1b[36m',`Created ${answer.department} department successfully`,'\x1b[0m');
                 init();
             }
         );
@@ -359,7 +360,7 @@ const updateRole = () => {
                     type: 'rawlist',
                     name: 'employeeFirst',
                     message: 'This is done in case there are multiple employees with the same last name. if there are, please select the employee you want to update their role based on their first name. If there is only one choice just press enter.',
-                    choices: employeeLast
+                    choices: employeeFirst
                 };
 
                 inquirer.prompt(question1).then(answer => {
@@ -368,7 +369,7 @@ const updateRole = () => {
                             employeeId = res[i].id;
                         }
                     }
-                    console.log('\x1b[44m',`You have selected the following employee: First name: ${answer.employeeFirst} | Last name: ${employee}`,'\x1b[0m');
+                    console.log('\x1b[36m',`You have selected the following employee: First name: ${answer.employeeFirst} | Last name: ${employee}`,'\x1b[0m');
                     nextChoices(employee);
                 });
             }
@@ -454,7 +455,7 @@ const updateRole = () => {
                         ],
                         (err) => {
                             if(err) throw err;
-                            console.log('\x1b[46m',`The current employee with the following last name: ${employees}, had their role successfully updated to: ${answer.role_list}.`,'\x1b[0m');
+                            console.log('\x1b[36m',`The current employee with the following last name: ${employees}, had their role successfully updated to: ${answer.role_list}.`,'\x1b[0m');
                             init();
                         }
                     );
@@ -472,7 +473,7 @@ const updateRole = () => {
                 let departments = [];
                 if (err) throw err;
                 for (i=0; i<res.length; i++) {
-                    departments.push(res[i].name);
+                    departments.push(res[i].department);
                 };
                 let question1 = {
                     type: 'input',
@@ -505,7 +506,7 @@ const updateRole = () => {
     
                 inquirer.prompt([question1, question2, question3]).then(answers => {
                     for (i=0; i<res.length; i++) {
-                        if(answers.department_list === res[i].name) {
+                        if(answers.department_list === res[i].department) {
                             departmentId = res[i].id;
                         }
                     };
@@ -518,7 +519,7 @@ const updateRole = () => {
                         },
                         (err, res) => {
                             if (err) throw err;
-                            console.log('\x1b[46m',`Role ${answers.role} added successfully!`,'\x1b[0m');
+                            console.log('\x1b[36m',`Role ${answers.role} added successfully!`,'\x1b[0m');
                             updateNewCreateRole(employees, answers.role);
                         }
                     );
@@ -558,7 +559,7 @@ const updateRole = () => {
                     ],
                     (err, res) => {
                         if (err) throw err;
-                        console.log('\x1b[44m',`Employee with the last name: ${employees} role has been updated to: ${roleName}`,'\x1b[0m');
+                        console.log('\x1b[36m',`Employee with the last name: ${employees} role has been updated to: ${roleName}`,'\x1b[0m');
                         init();
                 }
                 );
@@ -647,16 +648,42 @@ const updateManager = () => {
                 };
 
                 inquirer.prompt(question1).then(answer => {
-                    for (i=0; i<res.length; i++) {
-                        if(answer.manager_list === res[i].last_name) {
-                            selectedManagerId = res[i].id
-                        }
-                    };
-                    managerUpdate();
+                    managerFirstName(answer.manager_list);
                 });
             }
         );
     };
+
+    function managerFirstName(manager) {
+        connection.query(
+            `SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title
+            FROM employee
+            INNER JOIN role ON employee.role_id = role.id
+            WHERE employee.last_name =?;`,
+            [manager],
+            (err, res) => {
+                if (err) throw err;
+                const managerFirstNameArr = [];
+                for(i=0;i<res.length;i++) {
+                    if(res[i].title.toLowerCase().includes('manager')) { //This next line of code is used to update the manager Array with the any employee on the database that contains the word manager on their roles.
+                        managerFirstNameArr.push(res[i].first_name)
+                    }
+                };
+
+                let question1 = {
+                    type: 'rawlist',
+                    name: 'managerfirstname',
+                    message: 'This is done in case there are multiple managers with the same last name. If there is only one choice just press enter to continue. Otherwise choose the desired manager you wish to update the employee with.',
+                    choices: managerFirstNameArr
+                };
+
+                inquirer.prompt(question1).then(answer => {
+                    console.log('\x1b[36m', `You have chosen the following manager: first name: ${answer.managerfirstname} | last name: ${manager}`, '\x1b[0m');
+                    managerUpdate();
+                });
+            }
+        );
+    }
 
     function managerUpdate() {
         connection.query(
@@ -671,7 +698,7 @@ const updateManager = () => {
             ],
             (err) => {
                 if(err) throw err;
-                console.log('\x1b[33m','Employee manager updated successfully!','\x1b[0m');
+                console.log('\x1b[36m','Employee manager updated successfully!','\x1b[0m');
                 init();
             }
         );
@@ -702,7 +729,7 @@ const viewEmployeebyManager = () => {
             };
 
             inquirer.prompt(question1).then(answer => {
-                console.log('\x1b[41m','You have selected a manager with the following last name: '+ answer.manager_choice,'\x1b[0m');
+                console.log('\x1b[36m','You have selected a manager with the following last name: '+ answer.manager_choice,'\x1b[0m');
                 managerFirstName(answer.manager_choice);
             })
         }
@@ -830,7 +857,7 @@ const deletefunction = () => {
                     };
 
                     inquirer.prompt(question1).then(answer => {
-                        console.log('\x1b[31m',`You have selected to delete the following employee: first name: ${answer.first_name} | last name: ${employee}`,'\x1b[0m');
+                        console.log('\x1b[36m',`You have selected to delete the following employee: first name: ${answer.first_name} | last name: ${employee}`,'\x1b[0m');
                         for(i=0;i<res.length;i++) {
                             if(res[i].first_name === answer.first_name) {
                                 employeeId = res[i].id;
@@ -859,7 +886,7 @@ const deletefunction = () => {
                             [employeeId],
                             (err) => {
                                 if(err) throw err;
-                                console.log('\x1b[43m',`Employee ${first_name} ${last_name} has been successfully deleted!`,'\x1b[0m');
+                                console.log('\x1b[36m',`Employee ${first_name} ${last_name} has been successfully deleted!\n`,'\x1b[0m');
                                 init();
                             }
                         );
@@ -898,7 +925,7 @@ const deletefunction = () => {
                             roleId = res[i].id;
                         };
                     };
-                    console.log('\x1b[44m',`You have selected: ${answer.role_list}`,'\x1b[0m');
+                    console.log('\x1b[36m',`You have selected: ${answer.role_list}`,'\x1b[0m');
                     confirmRoleDelete(answer.role_list);
                 });
             }
@@ -920,7 +947,7 @@ const deletefunction = () => {
                             [roleId],
                             (err) => {
                                 if (err) throw err;
-                                console.log('\x1b[43m',`The following role: ${role} has been successfully deleted!`,'\x1b[0m');
+                                console.log('\x1b[36m',`The following role: ${role} has been successfully deleted!\n`,'\x1b[0m');
                                 init();
                             }
                         );
@@ -983,7 +1010,7 @@ const deletefunction = () => {
                             [departmentId],
                             (err) => {
                                 if(err) throw err;
-                                console.log('\x1b[43m',`The following department: ${department} has been successfully deleted!`,'\x1b[0m');
+                                console.log('\x1b[36m',`The following department: ${department} has been successfully deleted!\n`,'\x1b[0m');
                             }
                         );
                         init();
@@ -1025,7 +1052,7 @@ const viewBudget = () => {
                         departmentId = res[i].id;
                     }
                 };
-                console.log('\x1b[44m',`You have seleced the following department: ${answer.departments}`,'\x1b[0m');
+                console.log('\x1b[36m',`You have seleced the following department: ${answer.departments}`,'\x1b[0m');
                 budgetQuery(answer.departments);
             });
         }
@@ -1042,7 +1069,7 @@ const viewBudget = () => {
                     totalBudget += res[i].salary;
                 };
                 console.log(`----------------`);
-                console.log('\x1b[34m',`The total budget for the following department: ${department} is ${totalBudget}`,'\x1b[0m');
+                console.log('\x1b[36m',`The total budget for the following department: ${department} is ${totalBudget}`,'\x1b[0m');
                 console.log(`----------------`);
                 init();
             }
