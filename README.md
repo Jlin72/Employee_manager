@@ -32,7 +32,8 @@
 ## Screenshots or video
     Screenshot of the App on the console:
   ![App](https://i.imgur.com/E0BpFIF.png)
-  Video of the application in use: 
+  Video of the application in use: https://www.youtube.com/watch?v=XAS5vo1rF9Q&feature=youtu.be
+  
   Video of how to install the app: https://www.youtube.com/watch?v=BC9X-3hdqU0&feature=youtu.be
 ## Credits
   Made by: Jhonny Lin (Github: Jlin72 https://github.com/Jlin72)
