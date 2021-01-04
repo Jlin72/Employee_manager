@@ -1,4 +1,4 @@
-![NPM](https://img.shields.io/npm/l/express) ![npm](https://img.shields.io/npm/v/npm) ![David](https://img.shields.io/david/expressjs/express)
+![NPM](https://img.shields.io/npm/l/express) ![npm](https://img.shields.io/npm/v/npm) ![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-green)
 
 # Employee manager
 ## Table of contents
