@@ -21,6 +21,8 @@
   To run this application the user must first start download the entire repository either as a zip file or as a clone. Once that is done, then the user on their console must locate their files on their console. Next, on the console the user must type 'npm install' to download all the dependencies.
 
   Next, the user must start the database. To start the database, the user can use the provided sql file located within the repository. NOTE: FOR THE NEXT STEPS THE MYSQL IS REQUIERED. On mySql or on the console, the user should just copy and paste the code of the sql file into the console or mysql and run it. Check the videos for a visual tutorial on how to start the database.
+  
+  Lastly, make sure that to write the password of your database inside the const connectionParam.
 ## Usage
   Follow the next steps to run the app:
     1. Type npm start on the console.
