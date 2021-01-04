@@ -6,7 +6,7 @@ const mysql = require('mysql');
 const connectionParam = {
     database: 'workDB',
     host: 'localhost',
-    password: 'RinaPoyo349!',
+    password: '',
     PORT: 3306,
     user: 'root'
 };
