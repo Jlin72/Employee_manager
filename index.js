@@ -39,6 +39,7 @@ connection.connect((err) => {
     init();
 });
 
+//The const init will prompt the user to select what they want to do with the application.
 const init = () => {
     let question1 = {
         type: 'rawlist',
@@ -47,7 +48,7 @@ const init = () => {
         choices:['View all employees', 'View all employees by department', 'View all employees by role', 'View all employees by manager', 'Add employee, role or department', 'Update employee role', 'Upadate an employee manager', 'Delete employee, role or department', 'View the total utilized budget of a department', 'EXIT']
     };
     inquirer.prompt(question1).then((answer) => {
-        console.log('\x1b[43m','You have selected: ' + answer.init_choice, '\x1b[0m');
+        console.log('\x1b[36m','You have selected: ' + answer.init_choice, '\x1b[0m');
         switch (answer.init_choice) {
             case 'View all employees': 
                 viewEmployees();
@@ -84,6 +85,7 @@ const init = () => {
     })
 };
 
+// The next function, addEmployeeDepartment, will prompt the user to select what the user wants to add when they select the add function from the last prompt. The purpose of this function is to reduce the amount and simplify the amount of options on init().
 const addEmployeeRoleDepartment = () => {
     let question1 = {
         type: 'rawlist',
@@ -107,6 +109,7 @@ const addEmployeeRoleDepartment = () => {
     });
 };
 
+//The next function, viewEmployees, will display the entire list of employees that are stored within the database. 
 const viewEmployees = () => {
     connection.query(
         `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.department, role.salary
@@ -125,6 +128,8 @@ const viewEmployees = () => {
     );
 };
 
+
+//The next function, viewEmployeeDepartment, will display a table of the employees and their respective departments.
 const viewEmployeeDepartment = () => {
     connection.query(
         `SELECT employee.id, employee.first_name, employee.last_name, department.department
@@ -143,6 +148,7 @@ const viewEmployeeDepartment = () => {
     );
 };
 
+//The next function, viewEmployeeRole, will display a table of the employees and their respective roles.
 const viewEmployeeRole = () => {
     connection.query(
         `SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary
@@ -160,8 +166,9 @@ const viewEmployeeRole = () => {
     );
 };
 
+//The next function, addEmployee, is used to add a new employee to the database.
 const addEmployee = () => {
-    connection.query(
+    connection.query( //The following query is done to access to the dabase and obtain information from the role table, this is done to create a list of the roles available. This list is then used to ask the user to select one of the roles for the employee. Also, the id from that role will be used later to update the information within the database.
         `SELECT * FROM role;`,
         (err, res) => {
             if(err) throw err;
@@ -220,12 +227,13 @@ const addEmployee = () => {
     );
 };
 
+//The next function, addRole, will be used to add a new role to the database.
 const addRole = () => {
     connection.query (
         `SELECT * FROM department`,
         (err, res) => {
-            let departmentId;
-            let departments = [];
+            let departmentId; //This variable is used to store the department ID. Also, used later to link a role to a specific department.s
+            let departments = []; //This variable is initially empty but will later be updated to contain all the departments within the database.
             if (err) throw err;
             for (i=0; i<res.length; i++) {
                 departments.push(res[i].department);
@@ -334,17 +342,17 @@ const updateRole = () => {
             });
         }
     );
-
+    
+    //The next function, employeeFirst, is used to ask the user to confirm which employee they want to update their role based on their first name. This is done in case there are multiple employees with similar last names.
     const employeeFirst = (employee) => {
         connection.query(
             'SELECT * FROM employee WHERE last_name=?;',
             [employee],
             (err, res) => {
                 if(err) throw err;
-
-                const employeeLast = [];
+                const employeeFirst = []; //Empty array that will contain the employees first name.
                 for(i=0;i<res.length;i++) {
-                    employeeLast.push(res[i].first_name);
+                    employeeFirst.push(res[i].first_name);
                 };
 
                 let question1 = {
@@ -367,7 +375,7 @@ const updateRole = () => {
         );
     };
 
-    //This next function is used to ask the user to confirm if the user selected the correct employee. This is in case there are multiple employees with the same last name.
+    //This next function is used to ask the user to confirm if the user selected the correct employee.
     function nextChoices(employees) {
         let question1 = {
             type: 'list',
@@ -517,7 +525,8 @@ const updateRole = () => {
                 });
             }
         );
-
+        
+        //The next function is used to obtain the role ID based on the role the user selected.
         function updateNewCreateRole(employees, role) {
             let roleId;
             let roleName;
@@ -535,6 +544,7 @@ const updateRole = () => {
                 }
             );
             
+            //This next function will update the employee role based on the id of the role selected.
             function createdRoleUpdate(employees) {
                 connection.query(
                     'UPDATE employee SET ? WHERE ?',
@@ -557,15 +567,16 @@ const updateRole = () => {
     };
 };
 
+
+//The next function, updateManager, will be used to update manager of an employee on the database.
 const updateManager = () => {
-    let selectedEmployeeId;
-    let selectedManagerId;
+    let selectedEmployeeId; //This variable will be used to store the selected Id of the employee chosen by the user.
+    let selectedManagerId; //This variable will be used to store the id of the manager chosen by the user.
     connection.query(
         'SELECT * FROM employee;',
         (err,res) => {
             if(err) throw err;
-            let employeeArr = [];
-            let allEmployee = [];
+            let employeeArr = []; //Empty that array that will be used to store the list of employees within the database.
             for(i=0;i<res.length;i++) {
                 employeeArr.push(res[i].last_name);
             }
@@ -583,7 +594,7 @@ const updateManager = () => {
 
     //This next function is added in case there is a person with a similar last name
     function selectFirstName(employee) {
-        let firstNameArr = [];
+        let firstNameArr = []; //Empty array that will contain the first name of the employee(s) that have the last name selected by the user.
         connection.query(
             'SELECT * FROM employee WHERE last_name=?',
             [employee],
@@ -612,7 +623,9 @@ const updateManager = () => {
         )
     }
 
+    //This next function will be used to prompt the user to select the manager they want to update their employee with.
     function selectManager () {
+        //To select the managers a query will be done to the database using both the employee and role tables
         connection.query(
             `SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title
             FROM employee
@@ -621,7 +634,7 @@ const updateManager = () => {
                 if (err) throw err;
                 let managerArr = [];
                 for(i=0;i<res.length;i++) {
-                    if(res[i].title.toLowerCase().includes('manager')) {
+                    if(res[i].title.toLowerCase().includes('manager')) { //This next line of code is used to update the manager Array with the any employee on the database that contains the word manager on their roles.
                         managerArr.push(res[i].last_name)
                     }
                 };
@@ -665,9 +678,10 @@ const updateManager = () => {
     };
 };
 
+// The next function, viewEmployeebyManager, is used to display a table of all the employees based on a manager selected by the user.
 const viewEmployeebyManager = () => {
-    let managerArr= [];
-    let managerId;
+    let managerArr= []; //Empty array that will contain all the managers.
+    let managerId; //This variable will be updated later with the id of the manager selected by the user.
     connection.query(
         `SELECT employee.id, employee.first_name, employee.last_name, employee.role_id, role.title
         FROM employee
@@ -693,7 +707,8 @@ const viewEmployeebyManager = () => {
             })
         }
     );
-
+    
+    //This next function is used to prompt the user to select the manager they want to check for based on the manager first name. 
     function managerFirstName (manager) {
         connection.query(
             'SELECT * FROM employee where last_name=?',
@@ -726,6 +741,7 @@ const viewEmployeebyManager = () => {
         );
     };
 
+    //This next function will display a table of the employees that work under the selected manager.
     const employeeTableCreator = () => {
         connection.query(
             `SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee
@@ -741,6 +757,7 @@ const viewEmployeebyManager = () => {
     };
 };
 
+//The next function, deletefunction, contains all the code requiered for the delete function of the app to work.
 const deletefunction = () => {
     let question1 = {
         type: 'rawlist',
@@ -749,6 +766,7 @@ const deletefunction = () => {
         choices: ['Delete an employee', 'Delete a role', 'Delete a department', 'Return to previous menu']
     };
 
+    //The delete function will prompt the user to select from one of the following choices, this is done in order to contain all the delete fucntions within one choice on init.
     inquirer.prompt(question1).then(answer => {
         switch(answer.delete_choice) {
             case 'Delete an employee':
@@ -766,6 +784,7 @@ const deletefunction = () => {
         };
     });
 
+    //This function will delete an employee from the database.
     const deleteEmployee = () => {
         let employeeId;
         connection.query(
@@ -822,7 +841,8 @@ const deletefunction = () => {
                 }
             );
         };
-
+        
+        //This is done to ask the user to confirm if the user really wants to delete the employee from the database.
         const deleteConfirmation = (first_name, last_name) => {
             let question1 = {
                 type: 'list',
@@ -852,6 +872,7 @@ const deletefunction = () => {
         };
     };
 
+    //This next function will delete a role from the database.
     const deleteRole = () => {
         let roleId;
         connection.query(
@@ -882,7 +903,7 @@ const deletefunction = () => {
                 });
             }
         );
-
+        //This next function will prompt the user to confirm if they want to delete the selected role.
         const confirmRoleDelete = (role) => {
             let question1 = {
                 type: 'list',
@@ -912,6 +933,7 @@ const deletefunction = () => {
         };
     };
 
+    //This next function will delete the department from the database.
     const deleteDepartment = () => {
         let departmentId;
         connection.query(
@@ -942,7 +964,8 @@ const deletefunction = () => {
                 });
             }
         );
-
+        
+        //The following function, confirDepartmentDelete, is used to confirm wether the user wants to delete, in case they selected the wrong department to delete.
         const confirmDepartmentDelete = (department) => {
             let question1 = {
                 type: 'list',
@@ -974,9 +997,11 @@ const deletefunction = () => {
     };
 };
 
+
+// This const viewBudget contains the function that is required for the view budget functionality of the app to work.
 const viewBudget = () => {
     let totalBudget = 0;
-    let departmentId;
+    let departmentId; //This is used to store the departmentId which will be used later on the function.
     connection.query(
         'SELECT * FROM department;',
         (err,res) => {
@@ -1005,7 +1030,8 @@ const viewBudget = () => {
             });
         }
     );
-
+    
+    //The function budgetQuery is used to display a department budget on the console.
     const budgetQuery = (department) => {
         connection.query(
             `SELECT * FROM role where department_id=?`,
